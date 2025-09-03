@@ -38,7 +38,7 @@ func main() {
 
 	// Статические файлы
 	r.Static("/static", "./web/static")
-	r.LoadHTMLGlob("web/templates/*")
+	r.LoadHTMLGlob("app/web/templates/*")
 
 	log.Printf("Server starting on port %s", cfg.Port)
 	r.Run(":" + cfg.Port)
