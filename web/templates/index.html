@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{{.title}}</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+                text-align: center;
+                background-color: #f5f5f5;
+            }
+            .container {
+                background: white;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            .qr-container {
+                margin: 20px 0;
+                padding: 20px;
+                background: #f9f9f9;
+                border-radius: 8px;
+            }
+            #qr-code {
+                max-width: 300px;
+                height: 300px;
+                margin: 0 auto;
+                border: 2px solid #ddd;
+                border-radius: 8px;
+            }
+            .info {
+                margin: 15px 0;
+                padding: 10px;
+                background: #e3f2fd;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+            .timer {
+                font-size: 18px;
+                font-weight: bold;
+                color: #d32f2f;
+                margin: 10px 0;
+            }
+            .status {
+                display: inline-block;
+                padding: 5px 10px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            .status.active {
+                background: #4caf50;
+                color: white;
+            }
+            .status.expired {
+                background: #f44336;
+                color: white;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>{{.title}}</h1>
+
+            <div class="info">
+                <strong>Инструкция:</strong> Отсканируйте QR-код для отметки
+                посещаемости. QR-код обновляется каждые 12 секунд для
+                предотвращения мошенничества.
+            </div>
+
+            <div class="qr-container">
+                <img id="qr-code" src="/qr/current" alt="QR Code" />
+                <div class="timer">
+                    <span id="status" class="status active">АКТИВЕН</span>
+                    <div>
+                        Обновление через: <span id="countdown">12</span> сек
+                    </div>
+                </div>
+            </div>
+
+            {{if .qr_uuid}}
+            <div class="info">
+                <small>UUID: {{.qr_uuid}}</small><br />
+                <small>Истекает в: {{.expires_at}}</small>
+            </div>
+            {{end}}
+        </div>
+
+        <script>
+            let countdown = 12;
+            let countdownElement = document.getElementById("countdown");
+            let statusElement = document.getElementById("status");
+            let qrElement = document.getElementById("qr-code");
+
+            function updateCountdown() {
+                countdown--;
+                countdownElement.textContent = countdown;
+
+                if (countdown <= 3) {
+                    statusElement.textContent = "ОБНОВЛЯЕТСЯ";
+                    statusElement.className = "status expired";
+                }
+
+                if (countdown <= 0) {
+                    countdown = 12;
+                    statusElement.textContent = "АКТИВЕН";
+                    statusElement.className = "status active";
+
+                    // Обновляем QR-код
+                    qrElement.src = "/qr/current?t=" + new Date().getTime();
+
+                    // Перезагружаем страницу для обновления UUID
+                    setTimeout(() => {
+                        location.reload();
+                    }, 500);
+                }
+            }
+
+            // Запускаем таймер
+            setInterval(updateCountdown, 1000);
+
+            // Обновляем QR-код каждые 12 секунд
+            setInterval(() => {
+                qrElement.src = "/qr/current?t=" + new Date().getTime();
+            }, 12000);
+        </script>
+    </body>
+</html>
