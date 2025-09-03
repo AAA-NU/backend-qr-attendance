@@ -34,6 +34,7 @@ RUN adduser \
 USER appuser
 
 COPY --from=build /bin/server /bin/
+COPY web /app/web
 
 EXPOSE 8082
 
